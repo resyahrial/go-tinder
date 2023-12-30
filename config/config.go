@@ -30,6 +30,7 @@ type (
 		}
 		Store struct {
 			Postgresql DatabaseConfiguration
+			Migration  MigrationConfiguration
 		}
 	}
 
@@ -40,15 +41,16 @@ type (
 	}
 
 	DatabaseConfiguration struct {
-		Name                           string
-		User                           string
-		Password                       string
-		Host                           string
-		Port                           string
-		MaxIdleConnections             int
-		MaxOpenConnections             int
-		ConnectionMaxLifetimeInMinutes int
-		SSLMode                        string
+		Name     string
+		User     string
+		Password string
+		Host     string
+		Port     string
+		SSLMode  string
+	}
+
+	MigrationConfiguration struct {
+		TableName string
 	}
 )
 

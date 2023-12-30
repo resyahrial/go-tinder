@@ -14,9 +14,9 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type cleanupFn func() (name string, fn func())
+type CleanupFn func() (name string, fn func())
 
-func New(port int, cleanupFns ...cleanupFn) {
+func New(port int, cleanupFns ...CleanupFn) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
