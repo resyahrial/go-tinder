@@ -1,0 +1,16 @@
+app:
+  rest:
+    enabled: true
+    name: auth
+    port: 8080
+store:
+  postgresql:
+    name: gotinder_db
+    user: postgres
+    password: postgres
+    host: localhost
+    port: "5432"
+    maxOpenConnections: 4
+    minOpenConnections: 0
+    maxConnIdleTime: 1800 # in second
+    maxConnLifetime: 3600 # in second
