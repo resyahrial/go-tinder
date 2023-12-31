@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	pgConn     *sql.DB
+	PgConn     *sql.DB
 	pgConnOnce sync.Once
 )
 
@@ -37,20 +37,20 @@ func NewPgConnection(connStr string) {
 
 		log.Println("database connection established!")
 
-		pgConn = conn
+		PgConn = conn
 	})
 }
 
 func TerminatePgConnection() {
 	defer func() {
-		pgConn = nil
+		PgConn = nil
 		pgConnOnce = sync.Once{}
 	}()
-	if pgConn == nil {
+	if PgConn == nil {
 		return
 	}
 	log.Println("clossing db connection")
-	if err := pgConn.Close(); err != nil {
+	if err := PgConn.Close(); err != nil {
 		log.Println(errors.Wrap(err, "failed to close pg connection"))
 	} else {
 		log.Println("db connection closed")

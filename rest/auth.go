@@ -1,14 +1,19 @@
 package rest
 
 import (
+	"database/sql"
+	"errors"
+	"gotinder/infra"
 	"net/http"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/gin-gonic/gin"
 	"github.com/go-pkgz/auth"
 	"github.com/go-pkgz/auth/avatar"
 	"github.com/go-pkgz/auth/provider"
 	"github.com/go-pkgz/auth/token"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // RegisterAuth register auth handler
@@ -39,6 +44,25 @@ func (v v1) RegisterAuth() {
 }
 
 // checkCred validate user's credential
-func checkCred(user, password string) (bool, error) {
+func checkCred(email, password string) (bool, error) {
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	query, _, err := psql.Select("password").From("users").Where("email = $1").ToSql()
+	if err != nil {
+		return false, err
+	}
+
+	row := infra.PgConn.QueryRow(query, email)
+	var recordedPassword string
+	if err := row.Scan(&recordedPassword); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(recordedPassword), []byte(password)); err != nil {
+		return false, err
+	}
+
 	return true, nil
 }

@@ -3,12 +3,14 @@ module gotinder
 go 1.21.3
 
 require (
+	github.com/Masterminds/squirrel v1.5.4
 	github.com/amacneil/dbmate/v2 v2.10.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-pkgz/auth v1.22.0
 	github.com/lib/pq v1.10.9
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.18.2
+	golang.org/x/crypto v0.16.0
 	golang.org/x/sync v0.5.0
 )
 
@@ -38,6 +40,8 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.17.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
+	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
+	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
@@ -66,7 +70,6 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/arch v0.5.0 // indirect
-	golang.org/x/crypto v0.16.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/image v0.11.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
