@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -77,6 +78,7 @@ func New(port int, cleanupFns ...CleanupFn) {
 
 // NewHandler register handler on its path for restful API
 func NewHandler() *gin.Engine {
+	binding.Validator = new(bindValidator)
 	h := gin.Default()
 
 	h.GET("/", func(ctx *gin.Context) {

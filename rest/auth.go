@@ -13,7 +13,16 @@ import (
 	"github.com/go-pkgz/auth/avatar"
 	"github.com/go-pkgz/auth/provider"
 	"github.com/go-pkgz/auth/token"
+	passwordvalidator "github.com/wagslane/go-password-validator"
 	"golang.org/x/crypto/bcrypt"
+)
+
+type (
+	// registerRequest is a type of "/register" request body
+	registerRequest struct {
+		Email    string `json:"email" validate:"required,email"`
+		Password string `json:"password" validate:"required"`
+	}
 )
 
 // RegisterAuth register auth handler
@@ -40,7 +49,14 @@ func (v v1) RegisterAuth() {
 	})
 
 	authHandler, _ := service.Handlers()
-	v.group.Match([]string{http.MethodGet, http.MethodPost}, "/auth/*provider", gin.WrapH(authHandler))
+	v.group.Match([]string{http.MethodGet, http.MethodPost}, "/auth/*provider", func(ctx *gin.Context) {
+		provider := ctx.Param("provider")
+		if provider == "/register" && ctx.Request.Method == http.MethodPost {
+			register(ctx)
+			return
+		}
+		authHandler.ServeHTTP(ctx.Writer, ctx.Request)
+	})
 }
 
 // checkCred validate user's credential
@@ -65,4 +81,25 @@ func checkCred(email, password string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func register(ctx *gin.Context) {
+	var req registerRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if err := passwordvalidator.Validate(req.Password, 35); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "register success",
+	})
 }

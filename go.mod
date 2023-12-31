@@ -7,9 +7,13 @@ require (
 	github.com/amacneil/dbmate/v2 v2.10.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-pkgz/auth v1.22.0
+	github.com/go-playground/locales v0.14.1
+	github.com/go-playground/universal-translator v0.18.1
+	github.com/go-playground/validator/v10 v10.15.5
 	github.com/lib/pq v1.10.9
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.18.2
+	github.com/wagslane/go-password-validator v0.3.0
 	golang.org/x/crypto v0.16.0
 	golang.org/x/sync v0.5.0
 )
@@ -28,9 +32,6 @@ require (
 	github.com/go-oauth2/oauth2/v4 v4.5.2 // indirect
 	github.com/go-pkgz/repeater v1.1.3 // indirect
 	github.com/go-pkgz/rest v1.17.0 // indirect
-	github.com/go-playground/locales v0.14.1 // indirect
-	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.15.5 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
