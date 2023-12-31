@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"reflect"
 	"syscall"
 	"time"
 
@@ -14,8 +15,17 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type CleanupFn func() (name string, fn func())
+type (
+	// Cleanup is a type to define function which has to call on shutdown
+	CleanupFn func() (name string, fn func())
 
+	// v1 is a type to group register function
+	v1 struct {
+		group *gin.RouterGroup
+	}
+)
+
+// New run server with graceful shutdown
 func New(port int, cleanupFns ...CleanupFn) {
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -65,6 +75,7 @@ func New(port int, cleanupFns ...CleanupFn) {
 	}
 }
 
+// NewHandler register handler on its path for restful API
 func NewHandler() *gin.Engine {
 	h := gin.Default()
 
@@ -72,11 +83,17 @@ func NewHandler() *gin.Engine {
 		ctx.Status(http.StatusOK)
 	})
 
-	v1 := h.Group("/v1")
-
-	authService := newAuthService()
-	authHandler, _ := authService.Handlers()
-	v1.Match([]string{http.MethodGet, http.MethodPost}, "/auth/*provider", gin.WrapH(authHandler))
+	v1Group := v1{h.Group("/v1")}
+	registerHandler[v1](v1Group)
 
 	return h
+}
+
+// registerHandler register all handler on group routing
+func registerHandler[T any](group T) {
+	methodFinder := reflect.TypeOf(&group)
+	for i := 0; i < methodFinder.NumMethod(); i++ {
+		method := methodFinder.Method(i)
+		method.Func.Call([]reflect.Value{reflect.ValueOf(&group)})
+	}
 }

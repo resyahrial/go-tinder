@@ -4,12 +4,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-pkgz/auth"
 	"github.com/go-pkgz/auth/avatar"
+	"github.com/go-pkgz/auth/provider"
 	"github.com/go-pkgz/auth/token"
 )
 
-func newAuthService() *auth.Service {
+// RegisterAuth register auth handler
+func (v v1) RegisterAuth() {
 	opt := auth.Opts{
 		SecretReader: token.SecretFunc(func(aud string) (string, error) {
 			return "secret_key", nil
@@ -27,15 +30,15 @@ func newAuthService() *auth.Service {
 	}
 
 	service := auth.NewService(opt)
-	service.AddDirectProviderWithUserIDFunc("direct", credChecker{}, func(user string, r *http.Request) string {
+	service.AddDirectProviderWithUserIDFunc("direct", provider.CredCheckerFunc(checkCred), func(user string, r *http.Request) string {
 		return user
 	})
 
-	return service
+	authHandler, _ := service.Handlers()
+	v.group.Match([]string{http.MethodGet, http.MethodPost}, "/auth/*provider", gin.WrapH(authHandler))
 }
 
-type credChecker struct{}
-
-func (c credChecker) Check(user, password string) (bool, error) {
+// checkCred validate user's credential
+func checkCred(user, password string) (bool, error) {
 	return true, nil
 }
