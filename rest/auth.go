@@ -2,7 +2,6 @@ package rest
 
 import (
 	"database/sql"
-	"errors"
 	"gotinder/infra"
 	"net/http"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/go-pkgz/auth/avatar"
 	"github.com/go-pkgz/auth/provider"
 	"github.com/go-pkgz/auth/token"
+	"github.com/pkg/errors"
 	passwordvalidator "github.com/wagslane/go-password-validator"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -20,8 +20,9 @@ import (
 type (
 	// registerRequest is a type of "/register" request body
 	registerRequest struct {
-		Email    string `json:"email" validate:"required,email"`
-		Password string `json:"password" validate:"required"`
+		Email       string `json:"email" validate:"required,email"`
+		Password    string `json:"password" validate:"required"`
+		BirthOfDate int64  `json:"birth_of_date" validate:"required"`
 	}
 )
 
@@ -83,6 +84,7 @@ func checkCred(email, password string) (bool, error) {
 	return true, nil
 }
 
+// register processing user registration (validating, securing, recording)
 func register(ctx *gin.Context) {
 	var req registerRequest
 	if err := ctx.ShouldBind(&req); err != nil {
@@ -95,6 +97,30 @@ func register(ctx *gin.Context) {
 	if err := passwordvalidator.Validate(req.Password, 35); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
+		})
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": errors.Wrap(err, "failed to process request").Error(),
+		})
+		return
+	}
+
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	query, _, err := psql.Insert("users").Columns("email", "password", "birth_of_date").Values("$1", "$2", "$3").ToSql()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": errors.Wrap(err, "failed to build query").Error(),
+		})
+		return
+	}
+
+	if _, err := infra.PgConn.Exec(query, req.Email, string(hashedPassword), req.BirthOfDate); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": errors.Wrap(err, "failed to record request").Error(),
 		})
 		return
 	}
