@@ -72,5 +72,11 @@ func NewHandler() *gin.Engine {
 		ctx.Status(http.StatusOK)
 	})
 
+	v1 := h.Group("/v1")
+
+	authService := newAuthService()
+	authHandler, _ := authService.Handlers()
+	v1.Match([]string{http.MethodGet, http.MethodPost}, "/auth/*provider", gin.WrapH(authHandler))
+
 	return h
 }
