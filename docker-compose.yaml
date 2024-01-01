@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  store-pg:
+    image: postgis/postgis:15-3.4
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=gotinder_db
+    volumes:
+      - store-pg:/var/lib/postgresql/data
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GO_APP_ENV: local
+        APP_VERSION: 0.0
+    ports:
+      - 8080:8080
+    depends_on:
+      - store-pg
+    volumes:
+      - ./config:/root/config
+
+volumes:
+  store-pg:
+    driver: local
+

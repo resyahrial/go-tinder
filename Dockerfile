@@ -6,14 +6,13 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
 FROM alpine:latest  
-ENV GO_APP_ENV dev
+ENV GO_APP_ENV local
 ARG APP_VERSION local
 ENV APP_VERSION $APP_VERSION
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 COPY --from=builder /app/main .
-COPY config ./config
-COPY migration ./migration
+COPY migrations ./migrations
 
 EXPOSE 8080
 
