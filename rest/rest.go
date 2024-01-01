@@ -66,7 +66,6 @@ func New(port int, cleanupFns ...CleanupFn) {
 	eg.Go(func() error {
 		<-egCtx.Done()
 		log.Println("shutting down server")
-		time.Sleep(5 * time.Second)
 		err := srv.Shutdown(context.Background())
 		log.Println("server shutted down gracefully")
 		return err
@@ -103,5 +102,23 @@ func registerHandler[T any](group T) {
 	for i := 0; i < methodFinder.NumMethod(); i++ {
 		method := methodFinder.Method(i)
 		method.Func.Call([]reflect.Value{reflect.ValueOf(&group)})
+	}
+}
+
+// asGin converts middleware to the gin middleware handler.
+func asGin(middleware func(next http.Handler) http.Handler) gin.HandlerFunc {
+	return func(gctx *gin.Context) {
+		var skip = true
+		var handler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
+			gctx.Request = r
+			skip = false
+		}
+		middleware(handler).ServeHTTP(gctx.Writer, gctx.Request)
+		switch {
+		case skip:
+			gctx.Abort()
+		default:
+			gctx.Next()
+		}
 	}
 }
