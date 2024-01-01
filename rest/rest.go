@@ -23,6 +23,7 @@ type (
 	// v1 is a type to group register function
 	v1 struct {
 		group *gin.RouterGroup
+		auth  *authService
 	}
 )
 
@@ -85,7 +86,12 @@ func NewHandler() *gin.Engine {
 		ctx.Status(http.StatusOK)
 	})
 
-	v1Group := v1{h.Group("/v1")}
+	authSvc := new(authService)
+	authSvc.init()
+	v1Group := v1{
+		group: h.Group("/v1"),
+		auth:  authSvc,
+	}
 	registerHandler[v1](v1Group)
 
 	return h

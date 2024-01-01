@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"gotinder/infra"
 	"net/http"
+	"sync"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -17,7 +18,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var ()
+
 type (
+	// authService is a type to wrap go-auth service instance
+	authService struct {
+		once    sync.Once
+		service *auth.Service
+	}
+
 	// registerRequest is a type of "/register" request body
 	registerRequest struct {
 		Email       string `json:"email" validate:"required,email"`
@@ -26,30 +35,35 @@ type (
 	}
 )
 
+// init do initialize of authService
+func (s *authService) init() {
+	s.once.Do(func() {
+		opt := auth.Opts{
+			SecretReader: token.SecretFunc(func(aud string) (string, error) {
+				return "secret_key", nil
+			}),
+			SecureCookies:  true,
+			TokenDuration:  5 * time.Minute,
+			CookieDuration: 24 * 14 * time.Hour,
+			DisableXSRF:    false,
+			DisableIAT:     false,
+			Issuer:         "gotinder",
+			Validator: token.ValidatorFunc(func(token string, claims token.Claims) bool {
+				return claims.Issuer == "gotinder"
+			}),
+			AvatarStore: avatar.NewNoOp(),
+		}
+		s.service = auth.NewService(opt)
+	})
+}
+
 // RegisterAuth register auth handler
 func (v v1) RegisterAuth() {
-	opt := auth.Opts{
-		SecretReader: token.SecretFunc(func(aud string) (string, error) {
-			return "secret_key", nil
-		}),
-		SecureCookies:  true,
-		TokenDuration:  5 * time.Minute,
-		CookieDuration: 24 * 14 * time.Hour,
-		DisableXSRF:    false,
-		DisableIAT:     false,
-		Issuer:         "gotinder",
-		Validator: token.ValidatorFunc(func(token string, claims token.Claims) bool {
-			return claims.Issuer == "gotinder"
-		}),
-		AvatarStore: avatar.NewNoOp(),
-	}
-
-	service := auth.NewService(opt)
-	service.AddDirectProviderWithUserIDFunc("direct", provider.CredCheckerFunc(checkCred), func(user string, r *http.Request) string {
+	v.auth.service.AddDirectProviderWithUserIDFunc("direct", provider.CredCheckerFunc(checkCred), func(user string, r *http.Request) string {
 		return user
 	})
 
-	authHandler, _ := service.Handlers()
+	authHandler, _ := v.auth.service.Handlers()
 	v.group.Match([]string{http.MethodGet, http.MethodPost}, "/auth/*provider", func(ctx *gin.Context) {
 		provider := ctx.Param("provider")
 		if provider == "/register" && ctx.Request.Method == http.MethodPost {

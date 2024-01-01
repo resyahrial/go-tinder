@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// bindValidator is a type for custom validator for gin binding process
 type bindValidator struct {
 	once       sync.Once
 	validate   *validator.Validate
@@ -41,6 +42,7 @@ func (v *bindValidator) Engine() any {
 	return v.validate
 }
 
+// lazyinit do initialize of bindValidator
 func (v *bindValidator) lazyinit() {
 	v.once.Do(func() {
 		v.validate = validator.New()
