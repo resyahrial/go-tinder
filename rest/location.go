@@ -39,13 +39,7 @@ func updateLocation(ctx *gin.Context) {
 		return
 	}
 
-	user, err := token.GetUserInfo(ctx.Request)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": errors.Wrap(err, "failed to get user info").Error(),
-		})
-		return
-	}
+	user := token.MustGetUserInfo(ctx.Request)
 
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	findUserQuery, _, err := psql.Select("id").From("users").Where("email = $1").ToSql()

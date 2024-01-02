@@ -2,6 +2,8 @@ version: "3.9"
 services:
   store-pg:
     image: postgis/postgis:15-3.4
+    ports:
+      - 5433:5432
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
