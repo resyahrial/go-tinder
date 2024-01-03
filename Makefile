@@ -28,7 +28,7 @@ test:
 watch:
 	make tidy
 	test -s ${AIRPATH} || curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(GOPATH)/bin
-	GO_APP_ENV=local APP_VERSION=local ${AIRPATH}
+	APP_ENV=local APP_VERSION=local ${AIRPATH}
 
 tidy:
 	$(GOCMD) mod tidy

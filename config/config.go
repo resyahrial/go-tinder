@@ -29,8 +29,9 @@ type (
 			Rest AppConfiguration
 		}
 		Store struct {
-			Postgresql DatabaseConfiguration
+			Postgresql PGConfiguration
 			Migration  MigrationConfiguration
+			Redis      RedisConfiguration
 		}
 	}
 
@@ -40,13 +41,22 @@ type (
 		Port    int
 	}
 
-	DatabaseConfiguration struct {
-		Name     string
-		User     string
+	StoreConfiguration struct {
 		Password string
 		Host     string
 		Port     string
-		SSLMode  string
+	}
+
+	PGConfiguration struct {
+		StoreConfiguration `mapstructure:",squash"`
+		Name               string
+		User               string
+		SSLMode            string
+	}
+
+	RedisConfiguration struct {
+		StoreConfiguration `mapstructure:",squash"`
+		Database           int
 	}
 
 	MigrationConfiguration struct {
@@ -73,7 +83,7 @@ func loadConfigYml(cfg interface{}, path, name string) {
 	}
 
 	viper.SetConfigName(name)
-	viper.SetConfigType("yml")
+	viper.SetConfigType("yaml")
 	viper.AddConfigPath(path)
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -85,7 +95,7 @@ func loadConfigYml(cfg interface{}, path, name string) {
 	}
 }
 
-func (d DatabaseConfiguration) GetConfigString() string {
+func (d PGConfiguration) GetConfigString() string {
 	if d.SSLMode == "" {
 		d.SSLMode = "disable"
 	}
@@ -97,4 +107,8 @@ func (d DatabaseConfiguration) GetConfigString() string {
 
 func (a AppConfiguration) IsDebug() bool {
 	return appEnv != productionEnv
+}
+
+func (r RedisConfiguration) GetConfigString() string {
+	return fmt.Sprintf("%s:%v", r.Host, r.Port)
 }

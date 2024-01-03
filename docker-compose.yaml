@@ -10,21 +10,31 @@ services:
       - POSTGRES_DB=gotinder_db
     volumes:
       - store-pg:/var/lib/postgresql/data
+  store-redis:
+    image: redis:7.2.3-alpine
+    ports:
+      - 6378:6379
+    command: redis-server --save 60 1 --loglevel warning --requirepass redis
+    volumes: 
+      - store-redis:/data
   app:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        GO_APP_ENV: local
+        APP_ENV: stage
         APP_VERSION: 0.0
     ports:
       - 8080:8080
     depends_on:
       - store-pg
+      - store-redis
     volumes:
       - ./config:/root/config
 
 volumes:
   store-pg:
+    driver: local
+  store-redis:
     driver: local
 
