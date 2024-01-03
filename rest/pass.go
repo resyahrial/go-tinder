@@ -14,7 +14,7 @@ import (
 
 type (
 	passRequest struct {
-		ID uuid.UUID `json:"id" validate:"required,uuid"`
+		ID string `json:"id" validate:"required,uuid"`
 	}
 )
 
