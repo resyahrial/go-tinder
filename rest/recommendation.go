@@ -80,7 +80,7 @@ func findRecommendations(ctx *gin.Context) {
 
 	const maxDistanceInMeter = 150000
 	findRecommendationsQuery, _, err := psql.
-		Select("users.id").
+		Select("users.id", "users.birth_of_date", fmt.Sprintf("st_distancesphere(latest_locations.location::geometry,ST_SetSRID(ST_MakePoint(%s,%s), 4326)) AS distance", u.Lat, u.Lng)).
 		From("users").
 		LeftJoin("passes ON passes.target_id = users.id").
 		LeftJoin("likes ON likes.target_id = users.id").
@@ -108,40 +108,10 @@ func findRecommendations(ctx *gin.Context) {
 	}
 	defer rows.Close()
 
-	var recomendationIds []uuid.UUID
-	for rows.Next() {
-		var recomendationId uuid.UUID
-		if err := rows.Scan(
-			&recomendationId,
-		); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		recomendationIds = append(recomendationIds, recomendationId)
-	}
-
-	findRecommendationUsersRows, err := psql.
-		Select("users.id", "users.birth_of_date", fmt.Sprintf("st_distancesphere(latest_locations.location::geometry,ST_SetSRID(ST_MakePoint(%s,%s), 4326)) AS distance", u.Lat, u.Lng)).
-		From("users").
-		InnerJoin("latest_locations ON users.id = latest_locations.user_id").
-		Where(sq.Eq{"users.id": recomendationIds}).
-		OrderBy("latest_locations.updated_at DESC").
-		RunWith(infra.PgConn).
-		Query()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": errors.Wrap(err, "failed to build find recommendations query").Error(),
-		})
-		return
-	}
-	defer findRecommendationUsersRows.Close()
-
 	var recommendations []recommendationResponse
-	for findRecommendationUsersRows.Next() {
+	for rows.Next() {
 		var recommendation recommendationResponse
-		if err := findRecommendationUsersRows.Scan(
+		if err := rows.Scan(
 			&recommendation.ID,
 			&recommendation.BirthOfDate,
 			&recommendation.Distance,
