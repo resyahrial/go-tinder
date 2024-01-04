@@ -29,13 +29,19 @@ func (v v1) RegisterAction() {
 
 // like will record that the actor is liking the target
 func like(ctx *gin.Context) {
-	self, target, ok := getSelfAndTargetAction(ctx)
-	if !ok {
+	var req actionRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
+	user := token.MustGetUserInfo(ctx.Request)
+	self := user.StrAttr("user_id")
+
 	actionKey := fmt.Sprintf("action-%s", self)
-	if !isActionAllowed(ctx, actionKey) {
+	if !user.IsPaidSub() && !isActionAllowed(ctx, actionKey) {
 		return
 	}
 
@@ -53,14 +59,14 @@ func like(ctx *gin.Context) {
 		return
 	}
 
-	if _, err := infra.PgConn.Exec(query, self, target); err != nil {
+	if _, err := infra.PgConn.Exec(query, self, req.ID); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": errors.Wrap(err, "failed to record request").Error(),
 		})
 		return
 	}
 
-	if !cacheAction(ctx, actionKey, target) {
+	if !cacheAction(ctx, actionKey, req.ID) {
 		return
 	}
 
@@ -71,13 +77,19 @@ func like(ctx *gin.Context) {
 
 // pass will record that the actor is passing the target
 func pass(ctx *gin.Context) {
-	self, target, ok := getSelfAndTargetAction(ctx)
-	if !ok {
+	var req actionRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
+	user := token.MustGetUserInfo(ctx.Request)
+	self := user.StrAttr("user_id")
+
 	actionKey := fmt.Sprintf("action-%s", self)
-	if !isActionAllowed(ctx, actionKey) {
+	if !user.IsPaidSub() && !isActionAllowed(ctx, actionKey) {
 		return
 	}
 
@@ -95,36 +107,20 @@ func pass(ctx *gin.Context) {
 		return
 	}
 
-	if _, err := infra.PgConn.Exec(query, self, target); err != nil {
+	if _, err := infra.PgConn.Exec(query, self, req.ID); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": errors.Wrap(err, "failed to record request").Error(),
 		})
 		return
 	}
 
-	if !cacheAction(ctx, actionKey, target) {
+	if !cacheAction(ctx, actionKey, req.ID) {
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "success pass user",
 	})
-}
-
-// getSelfAndTargetAction validate and fetch action's actor and its target
-func getSelfAndTargetAction(ctx *gin.Context) (string, string, bool) {
-	var req actionRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return "", "", false
-	}
-
-	user := token.MustGetUserInfo(ctx.Request)
-	self := user.StrAttr("user_id")
-
-	return self, req.ID, true
 }
 
 // isActionAllowed check if action's actor is allowed to do the action
