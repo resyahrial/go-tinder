@@ -57,12 +57,12 @@ func (s *authService) init() {
 			Logger:      logger.Func(log.Printf),
 		}
 		s.service = auth.NewService(opt)
+		s.service.AddDirectProvider("direct", provider.CredCheckerFunc(checkCred))
 	})
 }
 
 // RegisterAuth register auth handler
 func (v v1) RegisterAuth() {
-	v.auth.service.AddDirectProvider("direct", provider.CredCheckerFunc(checkCred))
 	authHandler, _ := v.auth.service.Handlers()
 	v.group.Match([]string{http.MethodGet, http.MethodPost}, "/auth/*provider", func(ctx *gin.Context) {
 		provider := ctx.Param("provider")

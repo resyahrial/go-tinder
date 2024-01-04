@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"database/sql"
 	"fmt"
 	"gotinder/infra"
 	"net/http"
@@ -10,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-pkgz/auth/token"
 	"github.com/gomodule/redigo/redis"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -24,7 +22,7 @@ type (
 func (v v1) RegisterAction() {
 	authMiddleware := v.auth.service.Middleware()
 
-	locationGroup := v.group.Group("/actions", asGin(authMiddleware.Auth))
+	locationGroup := v.group.Group("/actions", asGin(authMiddleware.Auth), enrichActor)
 	locationGroup.POST("/likes", like)
 	locationGroup.POST("/passes", pass)
 }
@@ -36,8 +34,8 @@ func like(ctx *gin.Context) {
 		return
 	}
 
-	actionKey := fmt.Sprintf("action-%s", self.String())
-	if isActionAllowed(ctx, actionKey) {
+	actionKey := fmt.Sprintf("action-%s", self)
+	if !isActionAllowed(ctx, actionKey) {
 		return
 	}
 
@@ -62,7 +60,7 @@ func like(ctx *gin.Context) {
 		return
 	}
 
-	if cacheAction(ctx, actionKey, target) {
+	if !cacheAction(ctx, actionKey, target) {
 		return
 	}
 
@@ -71,15 +69,15 @@ func like(ctx *gin.Context) {
 	})
 }
 
-// -as will record that the actor is passing the target
+// pass will record that the actor is passing the target
 func pass(ctx *gin.Context) {
 	self, target, ok := getSelfAndTargetAction(ctx)
 	if !ok {
 		return
 	}
 
-	actionKey := fmt.Sprintf("action-%s", self.String())
-	if isActionAllowed(ctx, actionKey) {
+	actionKey := fmt.Sprintf("action-%s", self)
+	if !isActionAllowed(ctx, actionKey) {
 		return
 	}
 
@@ -104,7 +102,7 @@ func pass(ctx *gin.Context) {
 		return
 	}
 
-	if cacheAction(ctx, actionKey, target) {
+	if !cacheAction(ctx, actionKey, target) {
 		return
 	}
 
@@ -114,47 +112,19 @@ func pass(ctx *gin.Context) {
 }
 
 // getSelfAndTargetAction validate and fetch action's actor and its target
-func getSelfAndTargetAction(ctx *gin.Context) (uuid.UUID, uuid.UUID, bool) {
+func getSelfAndTargetAction(ctx *gin.Context) (string, string, bool) {
 	var req actionRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
-		return uuid.Nil, uuid.Nil, false
+		return "", "", false
 	}
 
 	user := token.MustGetUserInfo(ctx.Request)
+	self := user.StrAttr("user_id")
 
-	findUserQuery, _, err := sq.
-		StatementBuilder.
-		PlaceholderFormat(sq.Dollar).
-		Select("id").
-		From("users").
-		Where("email = $1").
-		ToSql()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": errors.Wrap(err, "failed to build find user query").Error(),
-		})
-		return uuid.Nil, uuid.Nil, false
-	}
-
-	row := infra.PgConn.QueryRow(findUserQuery, user.Name)
-	var self uuid.UUID
-	if err := row.Scan(&self); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusNotFound, gin.H{
-				"error": "user not found",
-			})
-			return uuid.Nil, uuid.Nil, false
-		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": errors.Wrap(err, "failed to find user").Error(),
-		})
-		return uuid.Nil, uuid.Nil, false
-	}
-
-	return self, uuid.MustParse(req.ID), true
+	return self, req.ID, true
 }
 
 // isActionAllowed check if action's actor is allowed to do the action
@@ -174,7 +144,6 @@ func isActionAllowed(ctx *gin.Context, actionKey string) bool {
 		return true
 	}
 
-	const maxActionAllowed int = 10
 	actionCount, err := redis.Int(cacheConn.Do("SCARD", actionKey))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -182,6 +151,8 @@ func isActionAllowed(ctx *gin.Context, actionKey string) bool {
 		})
 		return false
 	}
+
+	const maxActionAllowed int = 10
 	if actionCount >= maxActionAllowed {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "exceed max action allowed",
@@ -193,11 +164,11 @@ func isActionAllowed(ctx *gin.Context, actionKey string) bool {
 }
 
 // cacheAction will record current action
-func cacheAction(ctx *gin.Context, actionKey string, target uuid.UUID) bool {
+func cacheAction(ctx *gin.Context, actionKey string, target string) bool {
 	cacheConn := infra.RedisPool.Get()
 	defer cacheConn.Close()
 
-	if _, err := cacheConn.Do("SADD", actionKey, target.String()); err != nil {
+	if _, err := cacheConn.Do("SADD", actionKey, target); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
