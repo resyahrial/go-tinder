@@ -33,7 +33,7 @@ func (s *AuthTestSuite) TearDownSuite() {
 	s.Nil(infra.PgConn.Close())
 }
 
-func (s *AuthTestSuite) Test_AuthDirectLogin_Success() {
+func (s *AuthTestSuite) Test_Post_AuthDirectLogin_Success() {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("Valid1234!"), bcrypt.DefaultCost)
 	s.Nil(err)
 	_, err = sq.
@@ -41,7 +41,7 @@ func (s *AuthTestSuite) Test_AuthDirectLogin_Success() {
 		PlaceholderFormat(sq.Dollar).
 		Insert("users").
 		Columns("email", "password", "birth_of_date").
-		Values("valid@mail.com", hashedPassword, time.Now().Unix()).
+		Values("valid@mail.com", string(hashedPassword), time.Now().Unix()).
 		RunWith(infra.PgConn).
 		Exec()
 	s.Nil(err)
@@ -61,7 +61,7 @@ func (s *AuthTestSuite) Test_AuthDirectLogin_Success() {
 	}
 }
 
-func (s *AuthTestSuite) Test_AuthRegister_Success() {
+func (s *AuthTestSuite) Test_Post_AuthRegister_Success() {
 	currTime := time.Now()
 	res := newHttpTest().
 		withPath("/v1/auth/register").

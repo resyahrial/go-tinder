@@ -17,11 +17,13 @@ import (
 	"testing"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -85,6 +87,11 @@ func (b *httpTestBuilder) withBody(body any) *httpTestBuilder {
 	return b
 }
 
+func (b *httpTestBuilder) withHeader(key, val string) *httpTestBuilder {
+	b.header.Add(key, val)
+	return b
+}
+
 func newPostgresTest(t *testing.T) *postgresTest {
 	pgTestOnce.Do(func() {
 		var err error
@@ -120,4 +127,36 @@ func (p *postgresTest) migrate(t *testing.T, conn *sql.DB) {
 	require.NoError(t, err)
 
 	infra.Migrate(fmt.Sprintf("%s&search_path=%s,public", p.connStr, scheme), "../migrations", "test_scheme_migrations")
+}
+
+func getAuthToken(t *testing.T, pgConn *sql.DB) [][]string {
+	password := "Secret1234!"
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	require.NoError(t, err)
+	_, err = sq.
+		StatementBuilder.
+		PlaceholderFormat(sq.Dollar).
+		Insert("users").
+		Columns("email", "password", "birth_of_date").
+		Values("base@mail.com", string(hashedPassword), time.Now().Unix()).
+		RunWith(pgConn).
+		Exec()
+	require.NoError(t, err)
+
+	res := newHttpTest().
+		withPath("/v1/auth/direct/login").
+		withMethod(http.MethodPost).
+		withBody(map[string]interface{}{
+			"user":   "base@mail.com",
+			"passwd": password,
+		}).
+		do()
+
+	require.Equal(t, http.StatusOK, res.StatusCode)
+	cookies := make([][]string, 0)
+	for _, cookie := range res.Cookies() {
+		cookies = append(cookies, []string{cookie.Name, cookie.Value})
+	}
+	require.Len(t, cookies, 2)
+	return cookies
 }
