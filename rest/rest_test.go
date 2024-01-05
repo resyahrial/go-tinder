@@ -22,13 +22,16 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/modules/redis"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var (
-	pgTest     *postgresTest
-	pgTestOnce sync.Once
+	pgTest      *postgresTest
+	pgTestOnce  sync.Once
+	rdsTest     *redisTest
+	rdsTestOnce sync.Once
 )
 
 type (
@@ -42,7 +45,10 @@ type (
 	postgresTest struct {
 		container *postgres.PostgresContainer
 		connStr   string
-		conn      *sql.DB
+	}
+
+	redisTest struct {
+		connStr string
 	}
 )
 
@@ -107,9 +113,6 @@ func newPostgresTest(t *testing.T) *postgresTest {
 
 		pgTest.connStr, err = pgTest.container.ConnectionString(ctx, "sslmode=disable", "application_name=test")
 		require.NoError(t, err)
-		pgTest.conn, err = sql.Open("postgres", pgTest.connStr)
-		require.NoError(t, err)
-		require.NoError(t, pgTest.conn.Ping())
 
 		infra.Migrate(fmt.Sprintf("%s&search_path=public", pgTest.connStr), "../migrations", "test_scheme_migrations")
 	})
@@ -159,4 +162,23 @@ func getAuthToken(t *testing.T, pgConn *sql.DB) [][]string {
 	}
 	require.Len(t, cookies, 2)
 	return cookies
+}
+
+func newRedisTest(t *testing.T) *redisTest {
+	rdsTestOnce.Do(func() {
+		container, err := redis.RunContainer(context.Background(),
+			testcontainers.WithImage("docker.io/redis:7"),
+			redis.WithSnapshotting(10, 1),
+			redis.WithLogLevel(redis.LogLevelVerbose),
+		)
+		require.NoError(t, err)
+
+		_, err = container.MappedPort(context.Background(), "6379")
+		require.NoError(t, err)
+
+		rdsTest = &redisTest{
+			connStr: "localhost:6379",
+		}
+	})
+	return rdsTest
 }

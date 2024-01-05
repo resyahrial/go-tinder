@@ -3,7 +3,6 @@ package rest_test
 import (
 	"fmt"
 	"gotinder/infra"
-	"log"
 	"net/http"
 	"strconv"
 	"testing"
@@ -21,17 +20,12 @@ func TestLocationTestSuite(t *testing.T) {
 }
 
 func (s *LocationTestSuite) SetupSuite() {
-	s.T().Parallel()
-	_ = newPostgresTest(s.T())
+	pg := newPostgresTest(s.T())
+	infra.NewPgConnection(pg.connStr)
 }
 
 func (s *LocationTestSuite) SetupTest() {
-	infra.PgConn = pgTest.conn
 	pgTest.migrate(s.T(), infra.PgConn)
-}
-
-func (s *LocationTestSuite) TearDownSuite() {
-	s.Nil(infra.PgConn.Close())
 }
 
 func (s *LocationTestSuite) Test_Post_Location_Success() {
@@ -70,6 +64,5 @@ func (s *LocationTestSuite) Test_Post_Location_Success() {
 	s.Equal(lng, loc.Lng)
 	parsedLocation, err := strconv.ParseFloat(loc.Location, 64)
 	s.Nil(err)
-	log.Println(parsedLocation)
 	s.Less(parsedLocation, float64(1))
 }

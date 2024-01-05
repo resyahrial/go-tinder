@@ -20,17 +20,12 @@ func TestAuthTestSuite(t *testing.T) {
 }
 
 func (s *AuthTestSuite) SetupSuite() {
-	s.T().Parallel()
-	_ = newPostgresTest(s.T())
+	pg := newPostgresTest(s.T())
+	infra.NewPgConnection(pg.connStr)
 }
 
 func (s *AuthTestSuite) SetupTest() {
-	infra.PgConn = pgTest.conn
 	pgTest.migrate(s.T(), infra.PgConn)
-}
-
-func (s *AuthTestSuite) TearDownSuite() {
-	s.Nil(infra.PgConn.Close())
 }
 
 func (s *AuthTestSuite) Test_Post_AuthDirectLogin_Success() {
