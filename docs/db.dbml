@@ -1,0 +1,58 @@
+Table users {
+  id uuid [PK, not null]
+  created_at integer [not null, default: 'now']
+  updated_at integer [not null, default: 'now']
+  email varchar(255) [not null, unique]
+  password varchar(255) [not null]
+  birth_of_date integer [not null]
+  subscribe_until integer
+}
+
+Table latest_locations {
+  id uuid [PK, not null]
+  updated_at interger [not null, default: 'now']
+  lat real [not null]
+  lng real [not null]
+  location geography(Point, 4326) [not null]
+  user_id uuid [not null, unique, ref: - users.id]
+}
+
+Table passes {
+  self_id uuid [not null, ref: - users.id]
+  target_id uuid [not null, ref: - users.id]
+  created_at integer [not null, default: 'now']
+
+  indexes {
+    (self_id, target_id) [PK]
+  }
+}
+
+Table likes {
+  self_id uuid [not null, ref: - users.id]
+  target_id uuid [not null, ref: - users.id]
+  created_at integer [not null, default: 'now']
+
+  indexes {
+    (self_id, target_id) [PK]
+  }
+}
+
+Table coupons {
+  id uuid [PK, not null]
+  created_at integer [not null, default: 'now']
+  code varchar(255) [not null, unique]
+  duration_in_second integer [not null]
+  valid_until integer [not null]
+}
+
+Table user_coupons {
+  id uuid [PK, not null]
+  created_at integer [not null, default: 'now']
+  user_id uuid [not null, ref: > users.id]
+  coupon_id uuid [not null, ref: > coupons.id]
+  used_at integer
+
+  indexes {
+    (user_id, coupon_id) [unique, note: 'where used_at is null']
+  }
+}
