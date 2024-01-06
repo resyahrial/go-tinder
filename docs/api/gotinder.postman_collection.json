@@ -1,0 +1,1235 @@
+{
+	"info": {
+		"_postman_id": "cc862766-278b-4de2-9960-8762820a3015",
+		"name": "gotinder",
+		"description": "gotinder is an simple app inspired by popular Dating Mobile App Tinder/Bubble",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12365672"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "SignUp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"malang@mail.com\",\n    \"password\": \"Malang1234!\",\n    \"birth_of_date\": 631558800\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{v1}}/auth/register",
+							"host": [
+								"{{v1}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 - Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"malang@mail.com\",\n    \"password\": \"Malang1234!\",\n    \"birth_of_date\": 631558800\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/auth/register",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"auth",
+										"register"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:02:11 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "30"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"register success\"\n}"
+						},
+						{
+							"name": "400 - Bad Request",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"malang2@mail.com\",\n    \"password\": \"faf3r3\",\n    \"birth_of_date\": 631558800\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/auth/register",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"auth",
+										"register"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:03:05 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "120"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"insecure password, try including more special characters, using uppercase letters or using a longer password\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user\": \"malang@mail.com\",\n    \"passwd\": \"Malang1234!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{v1}}/auth/direct/login",
+							"host": [
+								"{{v1}}"
+							],
+							"path": [
+								"auth",
+								"direct",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 - Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"user\": \"malang@mail.com\",\n    \"passwd\": \"Malang1234!\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/auth/direct/login",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"auth",
+										"direct",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDQ1MjEzMTcsImp0aSI6IjgwMmI1NTc3OTE3YmU2ZDZlNGVhZGZlMjQzZDIxNmNiOTU0MmRhMjkiLCJpYXQiOjE3MDQ1MjEwMTcsImlzcyI6ImdvdGluZGVyIiwidXNlciI6eyJuYW1lIjoibWFsYW5nQG1haWwuY29tIiwiaWQiOiJkaXJlY3RfM2VhYzMxZGNhMDkzMWE1MWE1MTYwMzk5MGM1ODg0MDdhNmQyYzNiNSIsInBpY3R1cmUiOiIvYXZhdGFyLyJ9fQ.lKif2ZK79lRyHQnm8boUwZA83w_HjR4WGmxiarBobVc; Path=/; Max-Age=1209600; HttpOnly; Secure"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "XSRF-TOKEN=802b5577917be6d6e4eadfe243d216cb9542da29; Path=/; Max-Age=1209600; Secure"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:03:37 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "103"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"name\": \"malang@mail.com\",\n    \"id\": \"direct_3eac31dca0931a51a51603990c588407a6d2c3b5\",\n    \"picture\": \"/avatar/\"\n}"
+						},
+						{
+							"name": "400 - Bad Request",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"user\": \"malang@mail.com\",\n    \"passwd\": \"Malang1234\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/auth/direct/login",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"auth",
+										"direct",
+										"login"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:03:57 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "45"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"failed to check user credentials\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{v1}}/auth/direct/logout",
+							"host": [
+								"{{v1}}"
+							],
+							"path": [
+								"auth",
+								"direct",
+								"logout"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 - Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{v1}}/auth/direct/logout",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"auth",
+										"direct",
+										"logout"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "Set-Cookie",
+									"value": "JWT=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; Secure"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "XSRF-TOKEN=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; Secure"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:04:44 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "0"
+								}
+							],
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "List Auth",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{v1}}/auth/list",
+							"host": [
+								"{{v1}}"
+							],
+							"path": [
+								"auth",
+								"list"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 - Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{v1}}/auth/list",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"auth",
+										"list"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:05:05 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "11"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    \"direct\"\n]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Location",
+			"item": [
+				{
+					"name": "Update Location",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lat\": \"-7.94447\",\n    \"lng\": \"112.647\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{v1}}/locations",
+							"host": [
+								"{{v1}}"
+							],
+							"path": [
+								"locations"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 - Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"lat\": \"-7.94447\",\n    \"lng\": \"112.647\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/locations",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"locations"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:05:53 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "37"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"success update location\"\n}"
+						},
+						{
+							"name": "400 - Bad Request",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"lat\": \"-7.94447\",\n    \"lng\": \"xxxx\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/locations",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"locations"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:06:13 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "58"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"Lng must contain a valid longitude coordinates\"\n}"
+						},
+						{
+							"name": "401 - Unauthorized",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"lat\": \"-7.94447\",\n    \"lng\": \"112.647\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/locations",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"locations"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain; charset=utf-8"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:06:40 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "13"
+								}
+							],
+							"cookie": [],
+							"body": "Unauthorized\n"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Recommendation",
+			"item": [
+				{
+					"name": "Recommendation User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{v1}}/recommendations?limit=10",
+							"host": [
+								"{{v1}}"
+							],
+							"path": [
+								"recommendations"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 - Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{v1}}/recommendations?limit=10",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"recommendations"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:13:10 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "118"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": [\n        {\n            \"id\": \"8538db75-de81-4f43-9939-fc31b4073984\",\n            \"birth_of_date\": 631558800,\n            \"distance_in_meter\": \"3749.63218174\"\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Action",
+			"item": [
+				{
+					"name": "Like",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"8538db75-de81-4f43-9939-fc31b4073984\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{v1}}/actions/likes",
+							"host": [
+								"{{v1}}"
+							],
+							"path": [
+								"actions",
+								"likes"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 - Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"8538db75-de81-4f43-9939-fc31b4073984\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/actions/likes",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"actions",
+										"likes"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:15:02 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "31"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"success like user\"\n}"
+						},
+						{
+							"name": "400 - Bad Request",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"8538db75-de81-4f43-9939-fc31b40739\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/actions/likes",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"actions",
+										"likes"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:15:22 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "35"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"ID must be a valid UUID\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Pass",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"2e7751cf-fc2a-4ae5-9dee-0894a2cac630\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{v1}}/actions/passes",
+							"host": [
+								"{{v1}}"
+							],
+							"path": [
+								"actions",
+								"passes"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 - Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"2e7751cf-fc2a-4ae5-9dee-0894a2cac630\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/actions/passes",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"actions",
+										"passes"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:19:51 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "31"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"success pass user\"\n}"
+						},
+						{
+							"name": "400 - Bad Request",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"2e7751cf-fc2a-4ae5-9dee-0894a2cac6\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/actions/passes",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"actions",
+										"passes"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:20:05 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "35"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"ID must be a valid UUID\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Coupon",
+			"item": [
+				{
+					"name": "Create Coupon",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"NEWUSER123\",\n    \"duration_in_second\": 3600,\n    \"valid_until\": 1707200568\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{v1}}/coupons",
+							"host": [
+								"{{v1}}"
+							],
+							"path": [
+								"coupons"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 - Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"NEWUSER123\",\n    \"duration_in_second\": 3600,\n    \"valid_until\": 1707200568\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/coupons",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"coupons"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:23:25 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "35"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"success create coupon\"\n}"
+						},
+						{
+							"name": "400 - Bad Request",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"NEWUSER123@asd\",\n    \"duration_in_second\": 3600,\n    \"valid_until\": 1707200568\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/coupons",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"coupons"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDQ1MjI0ODcsImp0aSI6ImQ5YjcxM2E5ODdiNGVmMzBjODU5MmRkN2UxYjI0OGI2MGNiMTc2MzYiLCJpYXQiOjE3MDQ1MjIxODcsImlzcyI6ImdvdGluZGVyIiwidXNlciI6eyJuYW1lIjoibWFsYW5nQG1haWwuY29tIiwiaWQiOiJkaXJlY3RfM2VhYzMxZGNhMDkzMWE1MWE1MTYwMzk5MGM1ODg0MDdhNmQyYzNiNSIsInBpY3R1cmUiOiIvYXZhdGFyLyJ9fQ.Xzim9askXggIslEcrUkeASyn471knBcvwnDJcQgj9Jg; Path=/; Max-Age=1209600; HttpOnly; Secure"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "XSRF-TOKEN=d9b713a987b4ef30c8592dd7e1b248b60cb17636; Path=/; Max-Age=1209600; Secure"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:23:07 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "57"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"Code can only contain alphanumeric characters\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Apply Coupon",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"NEWUSER123\",\n    \"user_id\": \"6fa746df-c76e-40ba-9b2f-0f3c1efa99a5\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{v1}}/coupons/apply",
+							"host": [
+								"{{v1}}"
+							],
+							"path": [
+								"coupons",
+								"apply"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 - Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"NEWUSER123\",\n    \"user_id\": \"6fa746df-c76e-40ba-9b2f-0f3c1efa99a5\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/coupons/apply",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"coupons",
+										"apply"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:26:07 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "34"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"success apply coupon\"\n}"
+						},
+						{
+							"name": "404 - Not Found",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"NEWUSER1234\",\n    \"user_id\": \"6fa746df-c76e-40ba-9b2f-0f3c1efa99a5\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/coupons/apply",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"coupons",
+										"apply"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:25:46 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "28"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"coupon not found\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Use subscription coupon",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"coupon_code\": \"NEWUSER123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{v1}}/users/subscribe",
+							"host": [
+								"{{v1}}"
+							],
+							"path": [
+								"users",
+								"subscribe"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "404 - Not Found",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"coupon_code\": \"NEWUSER1234\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/users/subscribe",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"users",
+										"subscribe"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:27:51 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "47"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"coupon not found or already applied\"\n}"
+						},
+						{
+							"name": "200 - Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"coupon_code\": \"NEWUSER123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{v1}}/users/subscribe",
+									"host": [
+										"{{v1}}"
+									],
+									"path": [
+										"users",
+										"subscribe"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDQ1MjI3OTQsImp0aSI6ImQ5YjcxM2E5ODdiNGVmMzBjODU5MmRkN2UxYjI0OGI2MGNiMTc2MzYiLCJpYXQiOjE3MDQ1MjI0OTQsImlzcyI6ImdvdGluZGVyIiwidXNlciI6eyJuYW1lIjoibWFsYW5nQG1haWwuY29tIiwiaWQiOiJkaXJlY3RfM2VhYzMxZGNhMDkzMWE1MWE1MTYwMzk5MGM1ODg0MDdhNmQyYzNiNSIsInBpY3R1cmUiOiIvYXZhdGFyLyJ9fQ.Vd9_4JiOK2TV7K6vAurbY2pmu-N__I5MSgtj-tvS_t0; Path=/; Max-Age=1209600; HttpOnly; Secure"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "XSRF-TOKEN=d9b713a987b4ef30c8592dd7e1b248b60cb17636; Path=/; Max-Age=1209600; Secure"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 06 Jan 2024 06:28:14 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "41"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"success record subscription\"\n}"
+						}
+					]
+				}
+			]
+		}
+	]
+}

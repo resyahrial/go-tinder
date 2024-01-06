@@ -1,0 +1,14 @@
+title: Refresh Expiry Token
+
+Client->Server: Send request\nwith expired token
+alt: [not exceed refresh duration]
+    par: [renew token]
+        Server->Server: Generate new token
+    else: [process request]
+        Server->Postgres: Fetch data
+        Postgres->Server: Return data
+    end
+    Server->Client: Send response\nwith new token
+else: [exceed refresh duration]
+    Server->Client: Send error response
+end

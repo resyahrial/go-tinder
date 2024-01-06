@@ -1,0 +1,6 @@
+title: Login - Direct
+
+Client->Server: Send request
+Server->Postgres: Fetch data
+Postgres->Server: Return data
+Server->Client: Send response\n(with cookie\nif success)

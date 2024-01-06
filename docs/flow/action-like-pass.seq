@@ -1,0 +1,16 @@
+title: Action (like/pass)
+
+Client->Server: Send request
+Server->Redis: Find cached action
+Redis->Server: Response
+opt: [any action cached for this user]
+    alt: [found action for target like/pass]
+        Server->Client: Send response\n(not modified)
+    else: [non subscribed user and exceed limit action]
+        Server->Client: Send response\n(error)
+    end
+end
+Server->Postgres: Record action
+Postgres->Server: Response
+Server->Redis: Cache action
+Server->Client: Send response

@@ -1,0 +1,11 @@
+title: Subscription
+
+Client->Server: Send request
+Server->Postgres: Fetch data
+Postgres->Server: Response
+alt: [invalid coupon]
+    Server->Client: Send response\n(error)
+else:
+    Server->Postgres: Record subscription
+end
+Server->Client: Send response
