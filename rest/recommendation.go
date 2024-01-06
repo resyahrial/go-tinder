@@ -78,9 +78,30 @@ func findRecommendations(ctx *gin.Context) {
 		return
 	}
 
+	recommendations := fetchRecommendation(ctx, u.ID.String(), u.Lat, u.Lng, param.Limit)
+	if recommendations == nil {
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"data": recommendations,
+	})
+}
+
+func fetchRecommendation(ctx *gin.Context, userID, lat, lng string, limit int) []recommendationResponse {
 	const maxDistanceInMeter = 150000
-	findRecommendationsQuery, _, err := psql.
-		Select("users.id", "users.birth_of_date", fmt.Sprintf("st_distancesphere(latest_locations.location::geometry,ST_SetSRID(ST_MakePoint(%s,%s), 4326)) AS distance", u.Lat, u.Lng)).
+	findRecommendationsQuery, _, err := sq.
+		StatementBuilder.
+		PlaceholderFormat(sq.Dollar).
+		Select(
+			"users.id",
+			"users.birth_of_date",
+			fmt.Sprintf(
+				"st_distancesphere(latest_locations.location::geometry,ST_SetSRID(ST_MakePoint(%s,%s), 4326)) AS distance",
+				lat,
+				lng,
+			),
+		).
 		From("users").
 		LeftJoin("passes ON passes.target_id = users.id").
 		LeftJoin("likes ON likes.target_id = users.id").
@@ -88,25 +109,34 @@ func findRecommendations(ctx *gin.Context) {
 		Where("users.id != $1").
 		Where("passes.self_id IS NULL").
 		Where("likes.self_id IS NULL").
-		Where(fmt.Sprintf("ST_DWithin(latest_locations.location, ST_SetSRID(ST_MakePoint($2,$3), 4326)::geography, %v)", maxDistanceInMeter)).
+		Where(fmt.Sprintf(
+			"ST_DWithin(latest_locations.location, ST_SetSRID(ST_MakePoint($2,$3), 4326)::geography, %v)",
+			maxDistanceInMeter,
+		)).
 		OrderBy("latest_locations.updated_at DESC").
-		Limit(uint64(param.Limit)).
+		Limit(uint64(limit)).
 		ToSql()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": errors.Wrap(err, "failed to build find recommendations query").Error(),
 		})
-		return
+		return nil
 	}
 
-	rows, err := infra.PgConn.Query(findRecommendationsQuery, u.ID, u.Lat, u.Lng)
+	rows, err := infra.PgConn.Query(findRecommendationsQuery, userID, lat, lng)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return
+		return nil
 	}
 	defer rows.Close()
+	if err := rows.Err(); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return nil
+	}
 
 	var recommendations []recommendationResponse
 	for rows.Next() {
@@ -119,12 +149,9 @@ func findRecommendations(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
-			return
+			return nil
 		}
 		recommendations = append(recommendations, recommendation)
 	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"data": recommendations,
-	})
+	return recommendations
 }

@@ -22,7 +22,7 @@ type (
 	// applyCouponRequest is a type of "/coupons/apply" request body
 	applyCouponRequest struct {
 		Code   string `json:"code" validate:"required"`
-		UserId string `json:"user_id" validate:"required,uuid"`
+		UserID string `json:"user_id" validate:"required,uuid"`
 	}
 )
 
@@ -84,10 +84,10 @@ func applyCoupon(ctx *gin.Context) {
 		RunWith(infra.PgConn).
 		QueryRow()
 	var coupon struct {
-		Id         string
+		ID         string
 		ValidUntil int64
 	}
-	if err := row.Scan(&coupon.Id, &coupon.ValidUntil); err != nil {
+	if err := row.Scan(&coupon.ID, &coupon.ValidUntil); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, gin.H{
 				"error": "coupon not found",
@@ -112,7 +112,7 @@ func applyCoupon(ctx *gin.Context) {
 		PlaceholderFormat(sq.Dollar).
 		Insert("user_coupons").
 		Columns("user_id", "coupon_id").
-		Values(req.UserId, coupon.Id).
+		Values(req.UserID, coupon.ID).
 		RunWith(infra.PgConn).
 		Exec()
 	if err != nil {

@@ -51,8 +51,8 @@ func updateLocation(ctx *gin.Context) {
 	}
 
 	row := infra.PgConn.QueryRow(findUserQuery, user.Name)
-	var userId uuid.UUID
-	if err := row.Scan(&userId); err != nil {
+	var userID uuid.UUID
+	if err := row.Scan(&userID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, gin.H{
 				"error": "user not found",
@@ -69,7 +69,13 @@ func updateLocation(ctx *gin.Context) {
 		Insert("latest_locations").
 		Columns("updated_at", "lat", "lng", "user_id").
 		Values("$1", "$2", "$3", "$4").
-		Suffix("ON CONFLICT (user_id) DO UPDATE SET updated_at=EXCLUDED.updated_at, lat=EXCLUDED.lat, lng=EXCLUDED.lng, location=EXCLUDED.location").
+		Suffix(`
+			ON CONFLICT (user_id) DO UPDATE SET 
+			updated_at=EXCLUDED.updated_at, 
+			lat=EXCLUDED.lat, 
+			lng=EXCLUDED.lng, 
+			location=EXCLUDED.location
+		`).
 		ToSql()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -78,7 +84,7 @@ func updateLocation(ctx *gin.Context) {
 		return
 	}
 
-	if _, err := infra.PgConn.Exec(upsertLatestLocation, time.Now().Unix(), req.Lat, req.Lng, userId); err != nil {
+	if _, err := infra.PgConn.Exec(upsertLatestLocation, time.Now().Unix(), req.Lat, req.Lng, userID); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": errors.Wrap(err, "failed to record request").Error(),
 		})

@@ -34,4 +34,4 @@ tidy:
 	$(GOCMD) mod tidy
 
 lint:
-	golangci-lint run ${dir}
+	golangci-lint run ./...

@@ -18,6 +18,12 @@ type (
 	subcribeRequest struct {
 		CouponCode string `json:"coupon_code" validate:"required"`
 	}
+
+	userCoupon struct {
+		ID               string
+		DurationInSecond int64
+		UserSubscribedAt sql.NullInt64
+	}
 )
 
 // RegisterUser register user handler
@@ -52,12 +58,8 @@ func subscribe(ctx *gin.Context) {
 		Where("user_coupons.used_at IS NULL").
 		RunWith(infra.PgConn).
 		QueryRow()
-	var userCoupon struct {
-		Id               string
-		DurationInSecond int64
-		UserSubscribedAt sql.NullInt64
-	}
-	if err := row.Scan(&userCoupon.Id, &userCoupon.DurationInSecond, &userCoupon.UserSubscribedAt); err != nil {
+	var coupon userCoupon
+	if err := row.Scan(&coupon.ID, &coupon.DurationInSecond, &coupon.UserSubscribedAt); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, gin.H{
 				"error": "coupon not found or already applied",
@@ -70,12 +72,22 @@ func subscribe(ctx *gin.Context) {
 		return
 	}
 
+	if !updateSubscription(ctx, coupon, user.StrAttr("user_id")) {
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "success record subscription",
+	})
+}
+
+func updateSubscription(ctx *gin.Context, coupon userCoupon, userID string) bool {
 	tx, err := infra.PgConn.Begin()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return
+		return false
 	}
 	var isCommitted bool
 	defer func() {
@@ -87,23 +99,23 @@ func subscribe(ctx *gin.Context) {
 	}()
 
 	subscribeUntil := time.Now()
-	if subAt := userCoupon.UserSubscribedAt; subAt.Valid && subscribeUntil.Before(time.Unix(subAt.Int64, 0)) {
+	if subAt := coupon.UserSubscribedAt; subAt.Valid && subscribeUntil.Before(time.Unix(subAt.Int64, 0)) {
 		subscribeUntil = time.Unix(subAt.Int64, 0)
 	}
-	subscribeUntil = subscribeUntil.Add(time.Duration(userCoupon.DurationInSecond) * time.Second)
+	subscribeUntil = subscribeUntil.Add(time.Duration(coupon.DurationInSecond) * time.Second)
 
 	if _, err := sq.
 		StatementBuilder.
 		PlaceholderFormat(sq.Dollar).
 		Update("users").
 		Set("subscribe_until", subscribeUntil.Unix()).
-		Where("id = ?", user.StrAttr("user_id")).
+		Where("id = ?", userID).
 		RunWith(tx).
 		Exec(); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return
+		return false
 	}
 
 	if _, err := sq.
@@ -111,24 +123,22 @@ func subscribe(ctx *gin.Context) {
 		PlaceholderFormat(sq.Dollar).
 		Update("user_coupons").
 		Set("used_at", time.Now().Unix()).
-		Where("id = ?", userCoupon.Id).
+		Where("id = ?", coupon.ID).
 		RunWith(tx).
 		Exec(); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return
+		return false
 	}
 
 	if err := tx.Commit(); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return
+		return false
 	}
 	isCommitted = true
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "success record subscription",
-	})
+	return true
 }
