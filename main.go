@@ -4,6 +4,9 @@ import (
 	"gotinder/config"
 	"gotinder/infra"
 	"gotinder/rest"
+
+	_ "github.com/amacneil/dbmate/v2/pkg/driver/postgres"
+	_ "github.com/lib/pq"
 )
 
 func main() {

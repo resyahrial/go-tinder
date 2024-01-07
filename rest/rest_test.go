@@ -18,7 +18,9 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	_ "github.com/amacneil/dbmate/v2/pkg/driver/postgres"
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"

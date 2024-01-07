@@ -7,10 +7,7 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/lib/pq"
-
 	"github.com/amacneil/dbmate/v2/pkg/dbmate"
-	_ "github.com/amacneil/dbmate/v2/pkg/driver/postgres"
 	"github.com/pkg/errors"
 )
 

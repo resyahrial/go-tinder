@@ -13,9 +13,18 @@ import (
 )
 
 type (
+	// actionRequest is a type of action (like/pass) request body
 	actionRequest struct {
 		ID string `json:"id" validate:"required,uuid"`
 	}
+
+	// actionType is a type of available actions
+	actionType string
+)
+
+const (
+	actionLike actionType = "likes"
+	actionPass actionType = "passes"
 )
 
 // RegisterAction register like handler
@@ -29,44 +38,7 @@ func (v v1) RegisterAction() {
 
 // like will record that the actor is liking the target
 func like(ctx *gin.Context) {
-	var req actionRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	user := token.MustGetUserInfo(ctx.Request)
-	self := user.StrAttr("user_id")
-
-	actionKey := fmt.Sprintf("action-%s", self)
-	if !user.IsPaidSub() && !isActionAllowed(ctx, actionKey) {
-		return
-	}
-
-	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	query, _, err := psql.
-		Insert("likes").
-		Columns("self_id", "target_id").
-		Values("$1", "$2").
-		Suffix("ON CONFLICT (self_id,target_id) DO NOTHING").
-		ToSql()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": errors.Wrap(err, "failed to build create likes query").Error(),
-		})
-		return
-	}
-
-	if _, err := infra.PgConn.Exec(query, self, req.ID); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": errors.Wrap(err, "failed to record request").Error(),
-		})
-		return
-	}
-
-	if !cacheAction(ctx, actionKey, req.ID) {
+	if !action(ctx, actionLike) {
 		return
 	}
 
@@ -77,12 +49,23 @@ func like(ctx *gin.Context) {
 
 // pass will record that the actor is passing the target
 func pass(ctx *gin.Context) {
+	if !action(ctx, actionPass) {
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "success pass user",
+	})
+}
+
+// action is a common functionality of like and pass
+func action(ctx *gin.Context, actType actionType) bool {
 	var req actionRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
-		return
+		return false
 	}
 
 	user := token.MustGetUserInfo(ctx.Request)
@@ -90,37 +73,35 @@ func pass(ctx *gin.Context) {
 
 	actionKey := fmt.Sprintf("action-%s", self)
 	if !user.IsPaidSub() && !isActionAllowed(ctx, actionKey) {
-		return
+		return false
 	}
 
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	query, _, err := psql.
-		Insert("passes").
+		Insert(string(actType)).
 		Columns("self_id", "target_id").
 		Values("$1", "$2").
 		Suffix("ON CONFLICT (self_id,target_id) DO NOTHING").
 		ToSql()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": errors.Wrap(err, "failed to build create passes query").Error(),
+			"error": errors.Wrap(err, fmt.Sprintf("failed to build create %s query", string(actType))).Error(),
 		})
-		return
+		return false
 	}
 
 	if _, err := infra.PgConn.Exec(query, self, req.ID); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": errors.Wrap(err, "failed to record request").Error(),
 		})
-		return
+		return false
 	}
 
 	if !cacheAction(ctx, actionKey, req.ID) {
-		return
+		return false
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "success pass user",
-	})
+	return true
 }
 
 // isActionAllowed check if action's actor is allowed to do the action
